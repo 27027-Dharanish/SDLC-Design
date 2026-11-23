@@ -14,9 +14,8 @@
 - [1. Problem Statement](#1-problem-statement)
 - [2. Design Overview and Flow Diagram](#2-design-overview-and-flow-diagram)
 - [3. Implementation Details](#3-implementation-details)
-- [4. Alternative Implementations](#4-alternative-implementations)
-- [5. Security](#5-security)
-- [6. Open Issues](#6-open-issues)
+- [4. Security](#5-security)
+- [5. Open Issues](#6-open-issues)
  
 ---
  
@@ -51,10 +50,13 @@ flowchart TD
     Start([Start]) --> AuthMenu[Display Auth Menu<br/>Login / Signup]
     AuthMenu --> Choice{Choice == Signup?}
     
-    Choice -- Yes --> Signup[Enter Username & Password<br/>Validate & Save User]
+    Choice -- Yes --> Signup[Enter Username, Password & DOB]
+    Signup --> AgeCheck{Age > 7?}
+    AgeCheck -- No --> AuthMenu
+    AgeCheck -- Yes --> SaveUser[Validate & Save User]
     Choice -- Login --> Login[Enter Credentials & Verify]
     
-    Signup --> AuthCheck{Authenticated?}
+    SaveUser --> AuthCheck{Authenticated?}
     Login --> AuthCheck
     AuthCheck -- No --> AuthMenu
     
@@ -72,7 +74,9 @@ flowchart TD
     ValidInput -- No --> Prompt
     ValidInput -- Yes --> QuitCheck{Input == Q?}
     
-    QuitCheck -- Yes --> Discard[Award 0 Pts & Discard Match]
+    QuitCheck -- Yes --> ConfirmQuit{Confirm Quit?}
+    ConfirmQuit -- No --> RenderBoard
+    ConfirmQuit -- Yes --> Discard[Award 0 Pts & Discard Match]
     QuitCheck -- No --> PlaceMark[Place Mark & Record Move]
     
     TurnCheck -- AI O Turn --> AIMove[Compute AI Move<br/>Easy: Non-blocking / Med: 50% Minimax / Imp: Minimax]
@@ -99,6 +103,7 @@ flowchart TD
     %% Case 3: Logout / Exit
     MenuSel -- Logout / Exit --> ExitApp[Clear Session & Exit App]
     ExitApp --> Stop([Stop])
+
 ```
 
 
@@ -277,9 +282,7 @@ Example:
   }
 ]
 ```
- 
-Only completed matches will be stored in GameHistory.json. Matches that are quit before completion will not be included.
- 
+  
 ## 3.4 Technology Choices
  
 
@@ -298,7 +301,7 @@ These technologies are suitable because they are simple, lightweight, and suffic
  
 ## 3.5 Performance and Scalability
  
-The application is designed for individual users playing through a local console.
+The application is designed for individual users playing through a console.
  
 - The 3×3 game board requires very little processing time.
 - The Minimax algorithm can efficiently evaluate all possible Tic Tac Toe moves.
