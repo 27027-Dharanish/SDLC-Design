@@ -44,68 +44,8 @@ The application follows a simple modular structure. Each module is responsible f
 Since this is a console-based application, all user interactions will happen through the console. User details, scores, and match history will be stored in local JSON files.
  
 ## 2.1 System Architecture
- 
-```mermaid
-flowchart TD
-    Start([Start]) --> AuthMenu[Display Auth Menu<br/>Login / Signup]
-    AuthMenu --> Choice{Choice == Signup?}
-    
-    Choice -- Yes --> Signup[Enter Username, Password & DOB]
-    Signup --> AgeCheck{Age > 7?}
-    AgeCheck -- No --> AuthMenu
-    AgeCheck -- Yes --> SaveUser[Validate & Save User]
-    Choice -- Login --> Login[Enter Credentials & Verify]
-    
-    SaveUser --> AuthCheck{Authenticated?}
-    Login --> AuthCheck
-    AuthCheck -- No --> AuthMenu
-    
-    AuthCheck -- Yes --> MainMenu[Display Main Menu]
-    MainMenu --> MenuSel{Menu Selection}
-    
-    %% Case 1: Play Game
-    MenuSel -- Play Game --> SelMode[Select Mode<br/>Easy / Medium / Impossible / Manual]
-    SelMode --> InitBoard[Initialize 3x3 Board 1-9 & Live Scoreboard]
-    InitBoard --> RenderBoard[Render Console Board & Scores]
-    RenderBoard --> TurnCheck{Player 1 X Turn<br/>OR Manual Mode?}
-    
-    TurnCheck -- Human --> Prompt[Prompt Input 1-9 or Q to Quit]
-    Prompt --> ValidInput{Input is Q OR<br/>Valid Unoccupied Cell?}
-    ValidInput -- No --> Prompt
-    ValidInput -- Yes --> QuitCheck{Input == Q?}
-    
-    QuitCheck -- Yes --> ConfirmQuit{Confirm Quit?}
-    ConfirmQuit -- No --> RenderBoard
-    ConfirmQuit -- Yes --> Discard[Award 0 Pts & Discard Match]
-    QuitCheck -- No --> PlaceMark[Place Mark & Record Move]
-    
-    TurnCheck -- AI O Turn --> AIMove[Compute AI Move<br/>Easy: Non-blocking / Med: 50% Minimax / Imp: Minimax]
-    AIMove --> PlaceMark
-    
-    PlaceMark --> WinDraw{Win or Draw?}
-    WinDraw -- No --> RenderBoard
-    WinDraw -- Yes --> CompletedCheck{Input != Q?}
-    
-    CompletedCheck -- Completed --> EndGame[Render Final Board & Result<br/>Update Live Score +1 Winner, 0 Draw/Loss<br/>Save Timestamp, Mode, Result & Moves to JSON]
-    EndGame --> PlayAgain{Play Again in<br/>Same Mode?}
-    Discard --> PlayAgain
-    
-    PlayAgain -- Yes --> InitBoard
-    PlayAgain -- No --> MainMenu
-    
-    %% Case 2: Game History & Replay
-    MenuSel -- Game History & Replay --> LoadHistory[Load Completed Matches from JSON]
-    LoadHistory --> HistoryCheck{Matches Exist &<br/>User Selects One?}
-    HistoryCheck -- Yes --> Replay[Replay Moves on 3x3 Grid<br/>1s Delay per Move]
-    HistoryCheck -- No / Back --> MainMenu
-    Replay --> MainMenu
-    
-    %% Case 3: Logout / Exit
-    MenuSel -- Logout / Exit --> ExitApp[Clear Session & Exit App]
-    ExitApp --> Stop([Stop])
 
-```
-
+- [System architecture and the actual flow of the application](./ADR.md)
 
  
 ## 2.2 Application Flow
@@ -125,98 +65,12 @@ flowchart TD
  
 ## 3.1 Components and Responsibilities
  
-# C# Console Tic Tac Toe - Architecture & Project Timeline
+# C# Console Tic Tac Toe - Project Timeline
 
-## 1. System Modules
-
-| Component | Responsibility |
-| :--- | :--- |
-| **Authentication Module** | Handles user Login, Signup, and Logout with JSON/file persistence. |
-| **Main Menu Module** | Displays the available application options and manages navigation. |
-| **Game Controller** | Manages the overall gameplay loop, mode selection, and player turns. |
-| **Game Board Module** | Displays and updates the 3×3 Tic Tac Toe board in the console. |
-| **Game Logic Module** | Checks valid moves, winning conditions, draws, and mid-game quits. |
-| **Move Strategy Module** *(Consolidated Modes)* | Implements `IMoveStrategy` across 4 modes:<br>• **Easy Mode:** Random moves while avoiding blocking the player's immediate winning line.<br>• **Medium Mode:** Alternates between Minimax and random moves (50% probability).<br>• **Impossible Mode:** Full Minimax algorithm ensuring the AI never loses.<br>• **Manual Mode:** Local 2-player input on the same console. |
-| **Scoreboard Module** | Tracks and displays live session scores (+1 win, 0 draw/loss). |
-| **Match Persistence & Replay Module** | Saves completed match details (timestamp, mode, result, moves) to JSON and replays previous matches move-by-move with a 1s delay. |
-| **Enhancement Module** | Improves console UI with colors, box-drawing characters, and user-friendly prompts. |
-
----
-
-## 2. 5-Day Development Schedule (Nov 23 – Nov 27)
-
-| Day & Date | Modules Covered | Key Tasks & Deliverables | Est. Duration |
-| :--- | :--- | :--- | :--- |
-| **Day 1**<br>Mon, Nov 23 | • Authentication Module<br>• Main Menu Module | • Build user registration & login validation.<br>• Set up JSON storage for user credentials.<br>• Create the main navigation loop and session logout. | **4 hrs** |
-| **Day 2**<br>Tue, Nov 24 | • Game Board Module<br>• Game Logic Module<br>• Game Controller | • Render the 3×3 grid (cells 1–9) in the console.<br>• Implement move validation, win/draw checks, and `Q` to quit.<br>• Build the core turn-switching loop. | **6.5 hrs** |
-| **Day 3**<br>Wed, Nov 25 | • Move Strategy Module<br>*(Manual, Impossible, Medium, Easy)* | • Implement 2-player local input (Manual).<br>• Code the recursive Minimax algorithm (Impossible).<br>• Add 50% Minimax/random split (Medium) and non-blocking random logic (Easy). | **7.0 hrs** |
-| **Day 4**<br>Thu, Nov 26 | • Scoreboard Module<br>• Match Persistence & Replay Module | • Track live session scores.<br>• Serialize timestamp, mode, result, and move list to JSON.<br>• Build the step-by-step match replay feature. | **6.0 hrs** |
-| **Day 5**<br>Fri, Nov 27 | • Enhancement Module<br>• Final Testing & QA | • Add console colors (`X` vs `O`), borders, and clean screen clears.<br>• Test edge cases (invalid inputs, empty JSON files, mid-game quits). | **5.0 hrs** |
-
----
-
-## 3. Visual Timeline (Gantt Chart)
-
-```mermaid
-gantt
-    title C# Console Tic Tac Toe (Nov 23 – Nov 27)
-    dateFormat YYYY-MM-DD
-    axisFormat %a %b %d
-    tickInterval 1day
-
-    section Phase 1: Setup
-    Auth & Main Menu          :active, d1, 2026-11-23, 1d
-
-    section Phase 2: Core Game
-    Board, Logic & Controller :d2, 2026-11-24, 1d
-    AI & Manual Modes         :d3, 2026-11-25, 1d
-
-    section Phase 3: Features & UI
-    Scoreboard, History & Replay :d4, 2026-11-26, 1d
-    UI Polish & Testing       :d5, 2026-11-27, 1d
-
-```
+- [System Modules & 5-Day Development Timeline](./PROJECT_PLAN.md)
 
  
-## 3.2 Game Rules and Logic
- 
-The game will follow standard Tic Tac Toe rules.
- 
-- The board consists of a 3×3 grid with nine cells.
-- Player 1 will always use X and make the first move.
-- Player 2 or the computer will use O.
-- Players must enter a cell number between 1 and 9.
-- A player cannot place a mark in an already occupied cell.
-- Three matching marks in a horizontal, vertical, or diagonal line result in a win.
-- If all nine cells are occupied without a winner, the match ends in a draw.
- 
-### Game Modes
- 
-**1. Easy Mode**
- 
-- The computer selects a random available cell.
-- It avoids selecting a cell that blocks the player's immediate winning line.
-- If no non-blocking move is available, it selects from the remaining valid cells.
- 
-**2. Medium Mode**
- 
-- The computer alternates between optimal Minimax moves and random moves.
-- Each move has a 50% probability of using either strategy.
-- This provides a balanced gameplay experience.
- 
-**3. Impossible Mode**
- 
-- The computer uses the Minimax algorithm to evaluate possible moves.
-- It selects the best available move.
-- The computer guarantees that the player cannot win. The result will be either a computer victory or a draw.
- 
-**4. Manual Mode**
- 
-- Two players play on the same console.
-- Player 1 uses X, and Player 2 uses O.
-- Both players enter their moves one after another.
- 
-## 3.3 Data Storage
+## 3.2 Data Storage
  
 The application will use local JSON files to store user information, scores, and match history.
  
@@ -283,7 +137,7 @@ Example:
 ]
 ```
   
-## 3.4 Technology Choices
+## 3.3 Technology Choices
  
 
 | Technology | Purpose |
@@ -299,7 +153,7 @@ Example:
  
 These technologies are suitable because they are simple, lightweight, and sufficient for developing a console-based game.
  
-## 3.5 Performance and Scalability
+## 3.4 Performance and Scalability
  
 The application is designed for individual users playing through a console.
  
@@ -310,7 +164,7 @@ The application is designed for individual users playing through a console.
  
 Since the application is designed for local usage, large-scale server infrastructure is not required.
  
-## 3.6 Input Validation and Error Handling
+## 3.5 Input Validation and Error Handling
  
 The application will validate all user inputs before processing them.
  
@@ -324,7 +178,7 @@ The application will validate all user inputs before processing them.
  
 The board will remain unchanged when an invalid move is entered.
  
-## 3.7 Testing Strategy
+## 3.6 Testing Strategy
  
 The application will be tested at different levels to ensure that all functionalities work correctly.
   
@@ -333,12 +187,105 @@ The application will be tested at different levels to ensure that all functional
 - Test quitting a match during gameplay.
 - Test replaying previous matches.
 - Test invalid inputs and unexpected user actions.
- 
-# 4. Security
+
+# 4. Alternative implementations
+
+# Tic-Tac-Toe AI Algorithms
+
+A comprehensive overview of the algorithms used to build AI opponents for Tic-Tac-Toe, ranging from classic game-tree searches to machine learning approaches.
+
+---
+
+## 4.1 Minimax Algorithm
+The gold standard for two-player, zero-sum games. It recursively simulates every possible future move until the game ends, assuming the opponent will always play optimally. It assigns scores to outcomes (e.g., `+10` for a win, `-10` for a loss, `0` for a draw) and picks the move that maximizes its own score while minimizing the opponent's.
+
+* **Pros:**
+  * Guarantees an unbeatable AI that will never lose.
+  * Relatively simple to implement using recursion.
+* **Cons:**
+  * Evaluates every single possible game state, making it slow and computationally expensive if scaled to larger grids (e.g., 4x4 or 5x5).
+
+---
+
+## 4.2 Minimax with Alpha-Beta Pruning
+An optimized version of the standard Minimax algorithm. It keeps track of the best already-explored options along the path (`alpha` and `beta`) and stops evaluating a branch of moves the moment it realizes that branch is worse than a previously examined move.
+
+* **Pros:**
+  * Produces the exact same unbeatable results as standard Minimax.
+  * Runs significantly faster by skipping useless calculations.
+* **Cons:**
+  * Slightly more complex to write and debug than standard Minimax.
+
+---
+
+## 4.3 Rule-Based / Heuristic Approach (Newell and Simon’s Strategy)
+Instead of looking ahead at future moves, the AI follows a strict, prioritized checklist of rules for the current board state:
+1. Win if possible.
+2. Block the opponent's win.
+3. Create a fork (two simultaneous ways to win).
+4. Block the opponent's fork.
+5. Play the center square.
+6. Play the opposite corner of the opponent.
+7. Play an empty corner.
+8. Play an empty side.
+
+* **Pros:**
+  * Executes almost instantaneously with virtually zero memory or CPU overhead.
+  * Easy to adjust difficulty levels by simply removing rules from the top of the list.
+* **Cons:**
+  * Requires hardcoding game-specific human knowledge.
+  * Cannot easily adapt to variations of the game without rewriting the rules.
+
+---
+
+## 4.4 Lookup Table (Move Table)
+This approach pre-calculates and stores every possible board configuration—$3^9$ (`19,683`) states—along with the ideal response move in a massive array or database. During gameplay, the AI simply looks up the current board to find its move.
+
+* **Pros:**
+  * Instantaneous execution time ($O(1)$ lookup) during gameplay.
+* **Cons:**
+  * Consumes a large amount of memory/storage to hold all states.
+  * Tedious to generate without writing another algorithm to populate the table first.
+  * Zero adaptability to other games or grid sizes.
+
+---
+
+## 4.5 Reinforcement Learning (e.g., Q-Learning)
+Instead of being programmed with rules or tree searches, the AI plays thousands of games against itself or a random opponent. It gets rewarded for wins and penalized for losses, gradually updating a table of values (Q-table) to learn which moves lead to good outcomes.
+
+* **Pros:**
+  * Requires no hardcoded strategy or game-tree logic.
+  * Great educational tool for demonstrating how machine learning works in a simple environment.
+* **Cons:**
+  * Overkill for a solved game like Tic-Tac-Toe.
+  * Requires a training phase before it can play well.
+  * May still make suboptimal moves if it hasn't encountered a specific board state enough times during training.
+
+---
+
+## Summary Comparison
+
+| Algorithm | Unbeatable? | Speed | Implementation Difficulty |
+| :--- | :--- | :--- | :--- |
+| **Minimax** | Yes | Moderate | Medium |
+| **Alpha-Beta Pruning** | Yes | Fast | Medium-Hard |
+| **Rule-Based (Heuristic)** | Yes | Instant | Easy |
+| **Lookup Table** | Yes | Instant | Easy *(tedious setup)* |
+| **Q-Learning (ML)** | Eventually | Fast *(after training)* | Hard |
+
+## Recommendation
+### Why Standard Minimax is Better for 3x3 Tic-Tac-Toe
+
+* **Small Search Space:** A 3x3 grid has at most 9! (`362,880`) possible move sequences, and far fewer valid game states once wins and draws terminate branches early. Modern computers evaluate all of these in **a few milliseconds**.
+* **Easier to Write and Debug:** You don't need to track `alpha` and `beta` bounds across recursive calls, making your code cleaner, shorter, and much less prone to subtle bugs.
+* **Identical Gameplay:** Standard Minimax and Alpha-Beta Pruning make the **exact same moves**. For a human player, there is zero noticeable difference in speed or intelligence.
+
+
+# 5. Security
  
 Security is important because the application maintains user accounts and passwords.
  
-## 4.1 Authentication and Authorization
+## 5.1 Authentication and Authorization
  
 - Users must log in using valid credentials before accessing the main menu.
 - New users must register through the Signup section.
@@ -346,21 +293,21 @@ Security is important because the application maintains user accounts and passwo
 - Only one user account can be logged in during a console session.
 - Users can log out through the main menu.
  
-## 4.2 Data Handling
+## 5.2 Data Handling
  
 - User information, scores, and match history will be stored in local JSON files.
 - Passwords will be stored as secure password hashes instead of plain text.
 - Access to local data files will be restricted through appropriate file permissions.
 - Sensitive information will not be displayed unnecessarily in the console.
  
-## 4.3 Input Validation
+## 5.3 Input Validation
  
 - Username and password inputs will be validated during Signup and Login.
 - Game moves must contain valid cell numbers between 1 and 9.
 - Occupied cells cannot be selected.
 - Invalid characters and unexpected inputs will be handled safely.
  
-## 4.4 Threats and Mitigations
+## 5.4 Threats and Mitigations
  
 | Possible Threat | Mitigation |
 |---|---|
@@ -370,14 +317,14 @@ Security is important because the application maintains user accounts and passwo
 | Data Modification | Restrict access to local JSON files. |
 | Accidental Data Loss | Handle file operations carefully and validate stored data. |
  
-## 4.5 External Dependencies
+## 5.5 External Dependencies
  
 The application uses built-in .NET libraries and  JSON storage. No external services or third-party APIs are required.
  
-# 5. Open Issues
+# 6. Open Issues
  
  
-These points can be finalized before or during implementation based on testing and project requirements.
+There are no open issues in the application currently.
  
 ---
  
