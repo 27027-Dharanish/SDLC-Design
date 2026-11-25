@@ -1,4 +1,4 @@
-# High-Level Design (HLD) – Tic Tac Toe Console Application
+# High-Level Design (HLD) â€“ Tic Tac Toe Console Application
  
 ## Document Information
  
@@ -157,7 +157,7 @@ These technologies are suitable because they are simple, lightweight, and suffic
  
 The application is designed for individual users playing through a console.
  
-- The 3×3 game board requires very little processing time.
+- The 3Ã—3 game board requires very little processing time.
 - The Minimax algorithm can efficiently evaluate all possible Tic Tac Toe moves.
 - JSON files are sufficient for storing user details, scores, and match history.
 - Only one user account will be active during a console session.
@@ -194,20 +194,7 @@ The application will be tested at different levels to ensure that all functional
 
 A comprehensive overview of the algorithms used to build AI opponents for Tic-Tac-Toe, ranging from classic game-tree searches to machine learning approaches.
 
----
-
-## 4.1 Minimax Algorithm
-The gold standard for two-player, zero-sum games. It recursively simulates every possible future move until the game ends, assuming the opponent will always play optimally. It assigns scores to outcomes (e.g., `+10` for a win, `-10` for a loss, `0` for a draw) and picks the move that maximizes its own score while minimizing the opponent's.
-
-* **Pros:**
-  * Guarantees an unbeatable AI that will never lose.
-  * Relatively simple to implement using recursion.
-* **Cons:**
-  * Evaluates every single possible game state, making it slow and computationally expensive if scaled to larger grids (e.g., 4x4 or 5x5).
-
----
-
-## 4.2 Minimax with Alpha-Beta Pruning
+## 4.1 Minimax with Alpha-Beta Pruning
 An optimized version of the standard Minimax algorithm. It keeps track of the best already-explored options along the path (`alpha` and `beta`) and stops evaluating a branch of moves the moment it realizes that branch is worse than a previously examined move.
 
 * **Pros:**
@@ -218,7 +205,7 @@ An optimized version of the standard Minimax algorithm. It keeps track of the be
 
 ---
 
-## 4.3 Rule-Based / Heuristic Approach (Newell and Simon’s Strategy)
+## 4.2 Rule-Based / Heuristic Approach (Newell and Simonâ€™s Strategy)
 Instead of looking ahead at future moves, the AI follows a strict, prioritized checklist of rules for the current board state:
 1. Win if possible.
 2. Block the opponent's win.
@@ -238,8 +225,8 @@ Instead of looking ahead at future moves, the AI follows a strict, prioritized c
 
 ---
 
-## 4.4 Lookup Table (Move Table)
-This approach pre-calculates and stores every possible board configuration—$3^9$ (`19,683`) states—along with the ideal response move in a massive array or database. During gameplay, the AI simply looks up the current board to find its move.
+## 4.3 Lookup Table (Move Table)
+This approach pre-calculates and stores every possible board configurationâ€”$3^9$ (`19,683`) statesâ€”along with the ideal response move in a massive array or database. During gameplay, the AI simply looks up the current board to find its move.
 
 * **Pros:**
   * Instantaneous execution time ($O(1)$ lookup) during gameplay.
@@ -250,7 +237,7 @@ This approach pre-calculates and stores every possible board configuration—$3^9$
 
 ---
 
-## 4.5 Reinforcement Learning (e.g., Q-Learning)
+## 4.4 Reinforcement Learning (e.g., Q-Learning)
 Instead of being programmed with rules or tree searches, the AI plays thousands of games against itself or a random opponent. It gets rewarded for wins and penalized for losses, gradually updating a table of values (Q-table) to learn which moves lead to good outcomes.
 
 * **Pros:**
